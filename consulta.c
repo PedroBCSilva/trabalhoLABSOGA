@@ -5,9 +5,11 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <signal.h>
+
 pid_t firefox = 0;
 pid_t textEditor = 0;
 pid_t terminal = 0;
+
 char *firefoxState = "Não iniciado";
 char *textState = "Não iniciado";
 char *terminalState = "Não iniciado";
@@ -61,7 +63,7 @@ char *pidChecker(pid_t pid)
 {
     int status;
     if ((pid = waitpid(pid, &status, WNOHANG)) == -1)
-        perror("wait() error");
+        return "Não iniciado";
     else if (pid == 0)
     {
         char *aux = "Executando, pid=";
@@ -151,13 +153,13 @@ int main()
             //chama o editor de texto
             opcao = 0;
             load_textEditor();
-            atualizar_Estados();
+            // atualizar_Estados();
             break;
         case 3:
             //chama o terminal
             opcao = 0;
             load_terminal();
-            atualizar_Estados();
+            // atualizar_Estados();
             break;
         case 4:
         {
