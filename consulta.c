@@ -8,7 +8,9 @@
 pid_t firefox = 0;
 pid_t textEditor = 0;
 pid_t terminal = 0;
-
+char *firefoxState = "Não iniciado";
+char *textState = "Não iniciado";
+char *terminalState = "Não iniciado";
 void load_firefox(char *url)
 {
     firefox = fork();
@@ -54,10 +56,33 @@ void load_terminal()
         break;
     }
 }
+
+char *pidChecker(pid_t pid)
+{
+    int status;
+    if ((pid = waitpid(pid, &status, WNOHANG)) == -1)
+        perror("wait() error");
+    else if (pid == 0)
+    {
+        char *aux = "Executando, pid=";
+        return aux;
+    }
+    else
+    {
+        if (WIFEXITED(status))
+            return "Terminado";
+        else
+            return "Abortado";
+    }
+}
 void atualizar_Estados()
 {
     //pede a atualiza texto de estado dos processos
     printf("\nAtualizar estados\n");
+
+    firefoxState = pidChecker(firefox);
+    textState = pidChecker(textEditor);
+    terminalState = pidChecker(terminal);
 }
 void controlador_filhos(int signum)
 {
@@ -101,13 +126,14 @@ int main()
     while (continua == 1)
     {
         printf("<<<< Applications Menu >>>\n");
-        printf("\t1) Web Browser (%d)\n", firefox);
-        printf("\t2) Text Editor (%d)\n", textEditor);
-        printf("\t3) Terminal (%d)\n", terminal);
+        printf("\t1) Web Browser (%s)\n", firefoxState);
+        printf("\t2) Text Editor (%s)\n", textState);
+        printf("\t3) Terminal (%s)\n", terminalState);
         printf("\t4) Finalizar processo\n");
         printf("\t5) Quit\n");
         printf("Opcao:");
         scanf("%d", &opcao);
+
         switch (opcao)
         {
         case 1:
@@ -119,17 +145,19 @@ int main()
             scanf("%s", url);
             //chama o navegador com a url digitada
             load_firefox(url);
-        break;
+            break;
         }
         case 2:
             //chama o editor de texto
             opcao = 0;
             load_textEditor();
+            atualizar_Estados();
             break;
         case 3:
             //chama o terminal
             opcao = 0;
             load_terminal();
+            atualizar_Estados();
             break;
         case 4:
         {
@@ -157,7 +185,7 @@ int main()
                 printf("Processo com %d foi terminado\n", terminal);
                 terminal = 0;
             }
-        break;
+            break;
         }
         case 5:
             continua = 0;
